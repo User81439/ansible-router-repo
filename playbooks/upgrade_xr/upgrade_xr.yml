@@ -1,0 +1,213 @@
+---
+
+#Setup
+- name: Upgrade Cisco IOS XR routers
+  connection: network_cli
+  hosts: XR-network
+
+#Ask for user and password
+  vars_prompt:
+    - name: "ansible_user"
+      prompt: "Enter router username"
+      private: no
+    - name: "ansible_password"
+      prompt: "Enter router password"
+      private: yes
+
+#Set Vars
+  vars:
+    ncs540_image: "ncs540-goldenk9-x-7.7.2-iso.iso"
+    ncs5500_image: "ncs5500-goldenk9-x-7.7.2-iso.iso"
+    ncs540_hash: "c142d2c4840f7f4dd15c08deccec2b2a"
+    ncs5500_hash: "9f49255cf1d0730dae5df5c458085e75"
+    ncs540_software: "7.7.2"
+    ncs5500_software: "7.7.2"
+    ncs540_vrf: ""
+    ncs5500_vrf: "vrf mg"
+ #Where to store the precheck file
+    precheck_path: "/data/Cisco/"
+ #Set user and password
+    ansible_connection: network_cli
+    ansible_user: "{{ ansible_user }}"
+    ansible_password: "{{ ansible_password }}"
+
+#Run Tasks
+  tasks:
+ #Gather facts
+  - name: Gather facts from Cisco XR router
+    ios_facts:
+      gather_subset: min
+    register: router_facts
+
+ #Check if there is enough storage to proceed
+  - name: Check harddisk space
+    cisco.iosxr.iosxr_command:
+      commands: "show media | include harddisk:"
+    register: media_size
+
+  - name: Get free space
+    set_fact:
+      free_space: "{{ media_size.stdout | regex_search('\\S+\\s+\\S+\\s+\\S+\\s+\\S+\\s+(\\S+)G','\\1') | first }}"
+
+  - name: Check harddisk space
+    debug:
+      msg: "You have enough storage to continue"
+    when: "free_space | int >= 4"
+
+  - name: Check harddisk space
+    fail:
+      msg: "Not enough storage to continue"
+    when: "free_space | int < 4"
+
+ #Get pre-install check shows
+  - name: show hw-module
+    cisco.iosxr.iosxr_command:
+      commands: 
+      - show hw-module fpd
+    register: show_hw_module
+
+  - name: show ipv4
+    cisco.iosxr.iosxr_command:
+      commands: 
+      - show ipv4 interface summary
+    register: show_ipv4
+
+  - name: show mpls
+    cisco.iosxr.iosxr_command:
+      commands: 
+      - show mpls ldp neighbor
+    register: show_mpls
+
+  - name: show bgp
+    cisco.iosxr.iosxr_command:
+      commands: 
+      - show bgp ipv4 all summary
+    register: show_bgp
+
+  - name: show route
+    cisco.iosxr.iosxr_command:
+      commands:
+      - show route
+    register: show_route
+
+  - name: show interface
+    cisco.iosxr.iosxr_command:
+      commands:
+      - show interface
+    register: show_interface
+
+  - name: Write debug message to a file
+    lineinfile:
+      path: "{{ precheck_path }}{{ ansible_net_hostname }}-precheck.txt"
+      line: |
+        #### show hw-module fpd ####
+        {{ show_hw_module.stdout[0].strip().strip("show") }}
+
+        ##### show ipv4 interface summary ####
+        {{ show_ipv4.stdout[0].strip().strip("show") }}
+
+        ##### show mpls ldp neighbor ####
+        {{ show_mpls.stdout[0].strip().strip("show") }}
+
+        ##### show bgp ipv4 all summary ####
+        {{ show_bgp.stdout[0].strip().strip("show") }}
+
+        ##### show route ####
+        {{ show_route.stdout[0].strip().strip("show") }}
+
+        ##### show interface ####
+        {{ show_interface.stdout[0].strip().strip("show") }}
+      state: present
+      create: yes
+
+ #Set router type
+  - name: Set router model variable
+    set_fact:
+      router_type: "{{ ansible_net_model }}"
+
+ #Check router type
+  - name: Define the list of accepted router types
+    set_fact:
+      accepted_router_types: [ "NCS-540", "NCS-5500" ]
+
+  - name: Stop play if router type not recognised
+    fail:
+      msg: "Router type {{ router_type }} not recognised. Stopping play."
+    when: router_type not in accepted_router_types
+
+ #Copy this block to add another router, make sure to set the variables above
+  - name: Set 540 Image, Hash, Software
+    set_fact:
+      iosxr_image: "{{ ncs540_image }}"
+      iosxr_image_hash: "{{ ncs540_hash }}"
+      iosxr_software: "{{ ncs540_software }}"
+      iosxr_vrf: "{{ ncs540_vrf }}"
+    when: '"NCS-540" in router_type'
+ #Block End
+  - name: Set 5500 Image, Hash, Software
+    set_fact:
+      iosxr_image: "{{ ncs5500_image }}"
+      iosxr_image_hash: "{{ ncs5500_hash }}"
+      iosxr_software: "{{ ncs5500_software }}"
+      iosxr_vrf: "{{ ncs5500_vrf }}"
+    when: '"NCS-5500" in router_type'
+ #More here
+ #...
+
+ #Check software version
+  - name: Stop play if software is up to date
+    fail:
+      msg: "Current: {{ ansible_net_version }} and Update: {{ iosxr_software }} match"
+    when: iosxr_software == ansible_net_version
+
+ #transfer image
+  - name: Set image command 
+    set_fact:
+      image_transfer_cmd: "copy http://10.12.0.209/data/Cisco/{{ iosxr_image }} harddisk: {{ iosxr_vrf }}"
+
+  - name: Copying image to harddisk
+    cisco.iosxr.iosxr_command:
+      commands: 
+        - { command: '{{ image_transfer_cmd }}', prompt: 'Destination filename', answer: ''}
+    vars:
+      ansible_command_timeout: 1200
+
+ #calculate then verify hash
+  - name: Calculate file hash on router
+    cisco.iosxr.iosxr_command:
+      commands: show md5 file /harddisk:/{{ iosxr_image }}
+    register: image_hash
+
+  - name: Stop Play if Hash Verification Fails
+    fail:
+      msg: | 
+        Hash verification failed. Stopping play.
+        Expected Hash:   {{ iosxr_image_hash }}
+        Calculated Hash: {{ image_hash.stdout[0].strip().split("show")[-1].strip() }}
+    when: 'iosxr_image_hash != image_hash.stdout[0].strip().split("show")[-1].strip()'
+
+  - name: ready to install promt
+    debug:
+      msg: |
+        Hash verification success. Ready to install.
+        Expected Hash:   {{ iosxr_image_hash }}
+        Calculated Hash: {{ image_hash.stdout[0].strip().split("show")[-1].strip() }}
+    when: 'iosxr_image_hash == image_hash.stdout[0].strip().split("show")[-1].strip()'
+
+ #install
+  - name: Upgrade the {{ router_type }}, this will reload the router.
+    cisco.iosxr.iosxr_command:
+      commands: "install replace /misc/disk1/{{ iosxr_image }} noprompt"
+    register: install_replace_output
+    failed_when: false
+
+  - name: Install replace output
+    debug:
+      msg: out {{ install_replace_output }} end
+      verbosity: 0
+
+  - name: Debug reload router
+    debug:
+      msg: Reloading router {{ ansible_net_hostname }}
+      verbosity: 0
+    when: '"reload" in install_replace_output'

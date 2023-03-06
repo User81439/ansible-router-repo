@@ -1,0 +1,84 @@
+---
+
+- name: Get router names
+  hosts: localhost
+
+  vars:
+    router_list_path: "router_lists/"
+    router_list_file: "routers.txt"
+    inventory_file: "inventory.ini"
+
+#    infoblox_credentials: "infoblox_username:infoblox_password"
+#    infoblox_search: "state.user_input"
+#    infoblox_base_curl: "curl -k1 -u {{ infoblox_credentials }} -X GET 'https://10.19.9.209/wapi/v2.9/search' -d 'fqdn~={{ infoblox_>
+
+    options: ['test', 'test2', 'etc.']
+
+  tasks:
+
+    - name: Get state you want to update
+      pause:
+        prompt: "Enter state: {{ options }}"
+      register: state
+
+    - name: Fail if option is invalid
+      fail:
+        msg: "Selected option {{ state.user_input }} invalid, exiting.."
+        verbosity: 0
+      when: state.user_input not in options
+
+#Query Infoblox
+#Placeholder file read
+    - name: Read infoblox.json file
+      set_fact:
+        infoblox_json: "{{ lookup('file', 'infoblox.json') | from_json }}"
+
+#send curl
+    - name: Build cURL
+      debug:
+        msg: "hi"
+        verbosity: 0
+
+    - name: print cURL
+      debug:
+        msg: "also"#"{{ infoblox_base_curl }}"
+        verbosity: 0
+
+#Write ips to file
+    - name: Erase existing routers file
+      file:
+        path: "{{ router_list_path }}{{ router_list_file }}"
+        state: absent
+
+    - name: Write routers to file
+      lineinfile:
+        path: "{{ router_list_path }}{{ router_list_file }}"
+        line: "{{ item.ipv4addrs[0].ipv4addr if item.ipv4addrs is defined else '' }}"
+#        line: "{{ item.name.split('.')[0] if item.name is defined else '' }}"
+        state: present
+        create: yes
+      with_items: "{{ infoblox_json }}"
+
+#Put them into the .ini file
+    - name: Erase existing inventory file
+      file:
+        path: "inventory.ini"
+        state: absent
+
+    - name: Open file and assign to variable
+      set_fact:
+        router_list: "{{ lookup('file', router_list_path + router_list_file) }}"
+
+    - name: Add routers to inventory.ini
+      lineinfile:
+        path: "{{ inventory_file }}"
+        line: |
+          [XR-network]
+          {{ router_list }}
+
+          [XR-network:vars]
+          ansible_connection=ansible.netcommon.network_cli
+          ansible_network_os=cisco.iosxr.iosxr
+        state: present
+        create: yes
+

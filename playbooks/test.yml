@@ -1,0 +1,121 @@
+---
+# Ansible Playbook to upload new Cisco IOS
+# Only upload file if the current IOS version is different
+
+- name: Upload new CISCO IOS files
+  hosts: XR-network
+  connection: network_cli
+  gather_facts: no
+
+#Ask for user and password
+  vars_prompt:
+    - name: "ansible_user"
+      prompt: "Enter router username"
+      private: no
+    - name: "ansible_password"
+      prompt: "Enter router password"
+      private: yes
+
+  vars:
+    new_ios_file_name: md5-hash.txt
+    ansible_user: ssh_test
+
+
+  tasks:
+
+  - name: Copy file to device 
+    expect:
+      command: scp /data/Cisco/{{ new_ios_file_name }} {{ansible_user}}@{{ item }}:harddisk:/{{ new_ios_file_name }}
+      responses:
+        (.*)Password: "{{ ansible_password }}"
+    delegate_to: localhost
+    register: test
+    failed_when: test.rc != 1 or "No such" in test.stdout
+    loop: "{{ ansible_play_batch }}"
+
+
+# This below configuration works but will transfer to every router in inventory
+#  - name: Copy the file from local to hostname
+#    local_action: ansible.builtin.shell scp /data/Cisco/{{ new_ios_file_name }} {{ansible_user}}@{{ item }}:harddisk:/{{ new_ios_file_name }}
+#    register: test
+#    failed_when: test.rc == 0 or "No such" in test.stderr
+#    loop: "{{ groups['XR-network'] }}"
+
+#This code pauses after transferring to all routers you have to push enter to continue
+#  - name: Copy the file from local to hostname
+#    local_action: ansible.builtin.shell scp /data/Cisco/{{ new_ios_file_name }} {{ansible_user}}@{{ item }}:harddisk:/{{ new_ios_file_name }}
+#    register: test
+#    failed_when: test.rc == 0 or "No such" in test.stderr
+#    loop: "{{ ansible_play_batch }}"
+#    loop_control:
+#      pause: 3
+
+#Has issues and doens't function correctly
+#  - name: Copy the file from local to hostname
+#    local_action: raw scp /data/Cisco/{{ new_ios_file_name }} {{ansible_user}}@{{ item }}:harddisk:/{{ new_ios_file_name }}
+#    register: test
+#    failed_when: test.rc == 0 or "No such" in test.stderr
+#    loop: "{{ ansible_play_batch }}"
+#    loop_control:
+#      pause: 3
+
+#This code doesn't work correctly
+#  - name: Copy the file from local to hostname
+#    local_action: ansible.builtin.shell 
+#      sftp {{ansible_user}}@{{ item }}:/misc/disk1/{{ new_ios_file_name }}  
+#      put /data/Cisco/{{ new_ios_file_name }}
+#    register: test
+#    failed_when: test.rc != 0 or "No such" in test.stderr
+#    loop: "{{ ansible_play_batch }}"
+#    loop: "{{ groups['XR-network'] }}"
+
+#  - name: COPY FILE TO DEVICE
+#    ansible.netcommon.net_put:
+#      src: /data/Cisco/{{ new_ios_file_name }}
+#      protocol: scp
+#      dest : /misc/disk1/{{ new_ios_file_name }}
+#    vars:
+#      ansible_command_timeout: 5000
+
+
+#This code pauses after transferring to all routers
+#  - name: Copy the file from local to hostname
+#    local_action: ansible.builtin.shell scp /data/Cisco/{{ new_ios_file_name }} {{ansible_user}}@{{ item }}:harddisk:/{{ new_ios_file_name }}
+#    register: test
+#    failed_when: test.rc != 1 or "No such" in test.stderr
+#    loop: "{{ ansible_play_batch }}"
+
+#This code constantly asks for password
+#  - name: Copy the file from local to hostname
+#    local_action: ansible.builtin.command scp /data/Cisco/{{ new_ios_file_name }} {{ansible_user}}@{{ item }}:harddisk:/{{ new_ios_file_name }}
+#    register: test
+#    failed_when: test.rc == 0 or "No such" in test.stderr
+#    loop: "{{ ansible_play_batch }}"
+
+#  - name: Copy the file from local to hostname
+#    local_action: ansible.builtin.shell scp /data/Cisco/{{ new_ios_file_name }} {{ansible_user}}@{{ ansible_net_hostname }}:harddisk:/{{ new_ios_file_name }} 
+#    register: test
+#    failed_when: test.rc == 0 or "No such" in test.stderr
+
+#This code needs SSH public key as you can't pass username and password
+#  - name: Copy file
+#    copy:
+#      src: /data/Cisco/{{ new_ios_file_name }}
+#      dest: /harddisk:/{{ new_ios_file_name }}
+#    loop: "{{ ansible_play_batch }}"
+
+
+
+#    - name: Copy new IOS file
+#      ansible.builtin.copy:
+#        src: "/data/Cisco/{{ new_ios_file_name }}"
+#        dest: "{{ansible_user}}@33m-5-client:harddisk:/{{ new_ios_file_name }}"
+#      register: test
+#      prompt:
+#        - 'Password:'
+#      answer:
+#        - '{{ ansible_password }}'
+#      delegate_to: localhost
+#  - name: testing
+#    debug:
+#      msg: '{{ test }}'

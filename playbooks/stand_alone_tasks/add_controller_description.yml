@@ -1,0 +1,49 @@
+---
+
+- name: This play sets descriptions on 1k4 controller optics and coherent so the 1k4 can be upgraded without lossing communications.
+  connection: network_cli
+  hosts: 1K4-NETWORK
+  gather_facts: no
+
+  vars_prompt:
+    - name: "ansible_user"
+      prompt: "Enter router username"
+      private: no
+    - name: "ansible_password"
+      prompt: "Enter router password"
+      private: yes
+
+  tasks:
+    - name: Show controllers description
+      cisco.iosxr.iosxr_command:
+        commands: show controller description | exclude admin-down
+      register: show_controller
+
+    - name: remove Controllers DSP that already have a description
+      set_fact:
+        modify_controller_DSP: "{{ show_controller.stdout | replace('\\n', '\n') | regex_findall('(CoherentDSP\\S+)\\s+\\S+\\s+$','\\1') | list }}"
+
+    - name: remove Controllers Optic that already have a description
+      set_fact:
+        modify_controller_Opt: "{{ show_controller.stdout | replace('\\n', '\n') | regex_findall('(Optics\\S+)\\s+\\S+\\s+$','\\1') | list }}"
+
+    - name: Debug print gathered
+      debug:
+        msg:
+          - "{{ modify_controller_DSP }}"
+          - "{{ modify_controller_Opt }}"
+
+    - name: Add description to controllers DSP but don't overwrite existing
+      cisco.iosxr.iosxr_config:
+        lines:
+          - controller {{ item }}
+          -  description Ansible added description
+      loop: "{{ modify_controller_DSP }}"
+
+    - name: Add description to controllers Optical but don't overwrite existing
+      cisco.iosxr.iosxr_config:
+        lines:
+          - controller {{ item }}
+          -  description Ansible added description
+        match: none
+      loop: "{{ modify_controller_Opt }}"

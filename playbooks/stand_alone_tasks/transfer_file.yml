@@ -1,0 +1,80 @@
+---
+# Ansible Playbook to upload new Cisco IOS
+# Only upload file if the current IOS version is different
+
+- name: Upload new CISCO IOS files
+  hosts: XR-network
+  connection: network_cli
+
+#Ask for user and password
+  vars_prompt:
+    - name: "ansible_user"
+      prompt: "Enter router username"
+      private: no
+    - name: "ansible_password"
+      prompt: "Enter router password"
+      private: yes
+
+  vars:
+    file_location: "/data/Cisco/"
+    file_destinaion: "harddisk"
+    ncs540_image: "ncs540-goldenk9-x-7.7.2-iso.iso"
+    ncs5500_image: "ncs5500-goldenk9-x-7.7.2-iso.iso"
+    ncs540_hash: "c142d2c4840f7f4dd15c08deccec2b2a"
+    ncs5500_hash: "9f49255cf1d0730dae5df5c458085e75"
+
+  tasks:
+ #Gather facts
+  - name: Gather facts from Cisco XR router
+    ios_facts:
+      gather_subset: min
+
+ #Set router type
+  - name: Set router model variable
+    set_fact:
+      router_type: "{{ ansible_net_model }}"
+
+ #Set file to copy
+  - name: Set IOS file variables
+    set_fact:
+      ios_file_name: "{{ ncs540_image }}"
+      ios_file_hash: "{{ ncs540_hash }}"
+    when: '"NCS-540" in router_type'
+
+ #Copy the file to device
+  - name: Copy file to device
+    expect:
+      command: scp {{ file_location }}{{ ios_file_name }} {{ansible_user}}@{{ item }}:{{ file_destinaion }}:/{{ ios_file_name }}
+      timeout: 300
+      responses:
+        (.*)Password: "{{ ansible_password }}"
+    register: transfer
+    failed_when: transfer.rc != 1 or "No such" in transfer.stdout
+    loop: "{{ ansible_play_batch }}"
+
+  - name: uuuh
+    debug:
+      msg: "{{ transfer }}"
+
+ #calculate then verify hash
+  - name: Calculate file hash on router
+    cisco.iosxr.iosxr_command:
+      commands: show md5 file /harddisk:/{{ ios_file_name }}
+    register: image_hash
+
+  - name: Stop Play if Hash Verification Fails
+    fail:
+      msg: |
+        Hash verification failed. Stopping play.
+        Expected Hash:   {{ ios_file_hash }}
+        Calculated Hash: {{ image_hash.stdout[0].strip().split("show")[-1].strip() }}
+    when: 'ios_file_hash != image_hash.stdout[0].strip().split("show")[-1].strip()'
+
+  - name: ready to install promt
+    debug:
+      msg: |
+        Hash verification success.
+        Expected Hash:   {{ ios_file_hash }}
+        Calculated Hash: {{ image_hash.stdout[0].strip().split("show")[-1].strip() }}
+    when: 'ios_file_hash == image_hash.stdout[0].strip().split("show")[-1].strip()'
+

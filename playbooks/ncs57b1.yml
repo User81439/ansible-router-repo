@@ -1,0 +1,339 @@
+---
+
+#Setup
+- name: "Upgrade Cisco NCS57B XR"
+  connection: network_cli
+  hosts: XR-NCS57B-network
+
+#Ask for user and password
+  vars_prompt:
+    - name: "ansible_user"
+      prompt: "Enter router username"
+      private: no
+    - name: "ansible_password"
+      prompt: "Enter router password"
+      private: yes
+
+#Set Vars
+  vars:
+    ncs57b_image: "ncs5700-x64-7.8.1.iso"
+    ncs57b_hash: "0b7bc2496fb4c7e151e62bdf95459502"
+    ncs57b_software: "7.8.1"
+    ncs57b_vrf: ""
+    ncs57b_k9sec_tar: "ncs5700-k9sec-rpms.7.8.1.tar"
+    ncs57b_k9sec_tar_hash: "b41e27117fd0aaf8dbb4e5d8e3695693"
+    ncs57b_optional_tar: "ncs5700-optional-rpms.7.8.1.tar"
+    ncs57b_optional_tar_hash: "875976fa1c4ec08feae42d5dcbf46122"
+ #Where to store the precheck file
+    precheck_path: "/data/Cisco/"
+ #Set user and password
+    ansible_connection: "ansible.netcommon.network_cli"
+    ansible_user: "{{ ansible_user }}"
+    ansible_password: "{{ ansible_password }}"
+ #Set OS
+    ansible_network_os: cisco.iosxr.iosxr
+
+#Run Tasks
+  tasks:
+ #Gather facts
+  - name: Gather facts from Cisco XR router
+    ios_facts:
+      gather_subset: min
+    register: router_facts
+
+ #Get pre-install check shows
+  - name: show hw-module
+    cisco.iosxr.iosxr_command:
+      commands:
+      - show hw-module fpd
+    register: show_hw_module
+
+  - name: show interface
+    cisco.iosxr.iosxr_command:
+      commands:
+      - show interface summary
+    register: show_interface
+
+  - name: show ipv4
+    cisco.iosxr.iosxr_command:
+      commands:
+      - show ipv4 interface brief
+    register: show_ipv4
+
+  - name: show ipv6
+    cisco.iosxr.iosxr_command:
+      commands:
+      - show ipv6 interface brief
+    register: show_ipv6
+
+  - name: show platform
+    cisco.iosxr.iosxr_command:
+      commands:
+      - show platform
+    register: show_platform
+
+  - name: show inventory
+    cisco.iosxr.iosxr_command:
+      commands:
+      - show inventory
+    register: show_inventory
+
+  - name: Write debug message to a file
+    lineinfile:
+      path: "{{ precheck_path }}{{ ansible_net_hostname }}-precheck.txt"
+      line: |
+        #### show hw-module fpd ####
+        {{ show_hw_module.stdout[0].strip().strip("show") }}
+
+        ##### show interface summary ####
+        {{ show_interface.stdout[0].strip().strip("show") }}
+
+        ##### show ipv4 interface summary ####
+        {{ show_ipv4.stdout[0].strip().strip("show") }}
+
+        ##### show ipv6 interface summary ####
+        {{ show_ipv6.stdout[0].strip().strip("show") }}
+
+        ##### show platform #####
+        {{ show_platform.stdout[0].strip().strip("show") }}
+
+        ##### show inventory ####
+        {{ show_inventory.stdout[0].strip().strip("show") }}
+      state: present
+      create: yes
+
+ #Set router type
+  - name: show version
+    cisco.iosxr.iosxr_command:
+      commands:
+      - show version
+    register: show_version
+
+  - name: Set router model variable
+    set_fact:
+      router_type: "{{ show_version.stdout | regex_search('NCS-57B1-6D24-SYS') }}"
+
+  - name: Set router version
+    set_fact:
+      router_version: "{{ show_version.stdout | regex_search('Version\\s*:\\s*(\\d+\\.\\d+\\.\\d+)','\\1') | first }}"
+
+  - name: debug
+    debug:
+      msg: "{{ router_type }} {{ router_version }}"
+
+ #Check router type
+  - name: Define the list of accepted router types
+    set_fact:
+      accepted_router_types: [ "NCS-57B1-6D24-SYS" ]
+
+
+ #Copy this block to add another router, make sure to set the variables above
+  - name: Set 5700 Image, Hash, Software
+    set_fact:
+      iosxr_image: "{{ ncs57b_image }}"
+      iosxr_image_hash: "{{ ncs57b_hash }}"
+      iosxr_software: "{{ ncs57b_software }}"
+      iosxr_vrf: "{{ ncs57b_vrf }}"
+    when: '"NCS-57B1-6D24-SYS" in router_type'
+
+ #Check software version
+  - name: Stop play if software is up to date
+    fail:
+      msg: "Current: {{ router_version }} and Update: {{ iosxr_software }} match"
+    when: iosxr_software == router_version
+
+ #Transfer image
+ #This transfers the file via HTTP with a get
+#  - name: Set image command
+#    set_fact:
+#      image_transfer_cmd: "copy http://10.12.0.209/data/Cisco/{{ iosxr_image }} harddisk: {{ iosxr_vrf }}"
+
+#  - name: Copying image to harddisk
+#    cisco.iosxr.iosxr_command:
+#      commands:
+#        - { command: '{{ image_transfer_cmd }}', prompt: 'Destination filename', answer: ''}
+#    vars:
+#      ansible_command_timeout: 1200
+
+
+  - name: Copy file to device
+    expect:
+      command: scp /data/Cisco/{{ ncs57b_image }} {{ansible_user}}@{{ item }}:harddisk:/{{ ncs57b_image }}
+      timeout: 300
+      responses:
+        (.*)Password: "{{ ansible_password }}"
+    delegate_to: localhost
+    register: transfer
+    failed_when: transfer.rc != 0 or "No such" in transfer.stdout
+    loop: "{{ ansible_play_batch }}"
+
+
+ #calculate then verify hash
+  - name: Calculate file hash on router
+    cisco.iosxr.iosxr_command:
+      commands: show md5 file /harddisk:/{{ ncs57b_image }}
+    register: image_hash
+
+  - name: Stop Play if Hash Verification Fails
+    fail:
+      msg: |
+        Hash verification failed. Stopping play.
+        Expected Hash:   {{ ncs57b_hash }}
+        Calculated Hash: {{ image_hash.stdout[0].strip().split("show")[-1].strip() }}
+    when: 'ncs57b_hash != image_hash.stdout[0].strip().split("show")[-1].strip()'
+
+  - name: ready to install promt
+    debug:
+      msg: |
+        Hash verification success. Ready to install.
+        Expected Hash:   {{ iosxr_image_hash }}
+        Calculated Hash: {{ image_hash.stdout[0].strip().split("show")[-1].strip() }}
+    when: 'iosxr_image_hash == image_hash.stdout[0].strip().split("show")[-1].strip()'
+
+ #install
+  - name: Upgrade the {{ router_type }}, this will reload the router.
+    cisco.iosxr.iosxr_command:
+      commands: "install package replace /harddisk:/{{ iosxr_image }}"
+    register: install_replace_output
+    failed_when: false
+
+  - name: Remove repo on {{ router_type }}, location will be harddisk/:/new_repo/ {{ iosxr_software }}.
+    cisco.iosxr.iosxr_command:
+      commands: "rmdir harddisk:/local_repo/{{ iosxr_software }} location 0/RP0/CPU0"
+    register: remove_repo_output
+
+  - name: Create repo on {{ router_type }}, location will be harddisk/:/new_repo/ {{ iosxr_software }}.
+    cisco.iosxr.iosxr_command:
+      commands: "mkdir harddisk:/local_repo/{{ iosxr_software }} location 0/RP0/CPU0"
+    register: create_repo_output
+    failed_when: false
+
+# transfer file to directory.
+  - name: Copy the k9sec tar file from local to host
+    expect:
+      command: scp /data/Cisco/{{ ncs57b_k9sec_tar }} {{ansible_user}}@{{ item }}:harddisk:/local_repo/{{ iosxr_software }}/{{ ncs57b_k9sec_tar }}
+      responses:
+        (.*)Password: "{{ ansible_password }}"
+    delegate_to: localhost
+    register: k9sec
+    failed_when: '"No such" in k9sec.stdout'
+    loop: "{{ ansible_play_batch }}"
+
+ #calculate then verify hash
+  - name: Calculate file hash on router
+    cisco.iosxr.iosxr_command:
+      commands: show md5 file /harddisk:/local_repo/{{ iosxr_software }}/{{ ncs57b_k9sec_tar }}
+    register: tar_k9sec_hash
+
+  - name: Stop Play if Hash Verification Fails
+    fail:
+      msg: |
+        Hash verification failed. Stopping play.
+        Expected Hash:   {{ ncs57b_k9sec_tar_hash }}
+        Calculated Hash: {{ tar_k9sec_hash.stdout[0].strip().split("show")[-1].strip() }}
+    when: 'ncs57b_k9sec_tar_hash != tar_k9sec_hash.stdout[0].strip().split("show")[-1].strip()'
+
+
+  - name: Copy the optional tar file from local to host
+    expect:
+      command: scp /data/Cisco/{{ ncs57b_optional_tar }} {{ansible_user}}@{{ item }}:harddisk:/local_repo/{{ iosxr_software }}/{{ ncs57b_optional_tar }}
+      responses:
+        (.*)Password: "{{ ansible_password }}"
+    delegate_to: localhost
+    register: optional
+    failed_when: '"No such" in optional.stdout'
+    loop: "{{ ansible_play_batch }}"
+
+
+ #calculate then verify hash
+  - name: Calculate file hash on router
+    cisco.iosxr.iosxr_command:
+      commands: show md5 file /harddisk:/local_repo/{{ iosxr_software }}/{{ ncs57b_optional_tar }}
+    register: tar_optional_hash
+
+  - name: Stop Play if Hash Verification Fails
+    fail:
+      msg: |
+        Hash verification failed. Stopping play.
+        Expected Hash:   {{ ncs57b_optional_tar_hash }}
+        Calculated Hash: {{ tar_optional_hash.stdout[0].strip().split("show")[-1].strip() }}
+    when: 'ncs57b_optional_tar_hash != tar_optional_hash.stdout[0].strip().split("show")[-1].strip()'
+
+ #Install the Repo
+  - name: Tar -xvf local_repo on {{ router_type }}, location will be harddisk:/new_repo/ {{ iosxr_software }}.
+    cisco.iosxr.iosxr_command:
+      commands: 
+        - "run tar -xvf /misc/disk1/local_repo/{{ iosxr_software }}/{{ ncs57b_k9sec_tar }} -C /misc/disk1/local_repo/{{ iosxr_software }}/"
+        - "run tar -xvf /misc/disk1/local_repo/{{ iosxr_software }}/{{ ncs57b_optional_tar }} -C /misc/disk1/local_repo/{{ iosxr_software }}/"
+    register: tar_repo_output
+
+  - name: Configure the new repo in configuration
+    cisco.iosxr.iosxr_config:
+      lines:
+        - "install"
+        - " repository {{ iosxr_software }}"  
+        - "  url file:///misc/disk1/local_repo/{{ iosxr_software }}"
+
+  - name: Show the packages to install
+    cisco.iosxr.iosxr_command:
+      commands: "show install available"
+    register: install_available
+
+  - name: Find packages
+    set_fact:
+      xrk9_version: "{{ install_available.stdout | regex_findall('xr-k9sec\\s+x86_64\\s+([\\d\\.]+v\\d\\.\\d\\.\\d-\\d)') }}"
+      cdp_version: "{{ install_available.stdout | regex_findall('xr-cdp\\s+x86_64\\s+([\\d\\.]+v\\d\\.\\d\\.\\d-\\d)') }}"
+
+# This below doesn't work quite right
+#  - name: Extract the latest version
+#    set_fact:
+#      latest_version: "{{ version_list | map('regex_findall','(\\s*' + iosxr_software + 'v\\d\\.\\d\\.\\d-\\d)') }}"
+#    when: version_list|length > 0
+
+#  - name: Print extracted version
+#    debug:
+#      var: latest_version
+# Output
+#ansible_facts:
+#    latest_version:
+#    - ''
+#    - ''
+
+  - name: Find the packages to install
+    set_fact:
+      xrk9_package: "{{ xrk9_version | regex_search('(\\s*' + iosxr_software + 'v\\d\\.\\d\\.\\d-\\d)') }}"
+      cdp_package: "{{ cdp_version | regex_search('(\\s*' + iosxr_software + 'v\\d\\.\\d\\.\\d-\\d)') }}"
+
+  - name: Debug packages
+    debug:
+      msg: What is in packages we are installing xr-k9sec-{{ xrk9_package }} and xr-cdp-{{ cdp_package }}
+
+ # Fail if packages can't be found
+  - name: Stop play if packages can't be found
+    fail:
+      msg: |
+        Stopping play because the correct packages can't be found
+    when: xrk9_version == [] 
+
+  - name: Install packages
+    cisco.iosxr.iosxr_command:
+      commands:
+        - "install package add xr-k9sec-{{ xrk9_package }} xr-cdp-{{ cdp_package }}"
+
+  - name: Check packages are successfully installed
+    cisco.iosxr.iosxr_command:
+      commands:
+        - "show install request"
+    register: install_request
+    until: install_request.stdout | regex_findall('State:\\s+Success') 
+    retries: 6
+    delay: 120 
+
+  - name: Debug install request
+    debug:
+      msg: "Check packages runs 5 times with a delay of 20secs and will only continue if State equals Success, this is to ensure the router is ready for a reload"
+
+  - name: Install and reload
+    cisco.iosxr.iosxr_command:
+      commands:
+        - "install apply reload noprompt" 
