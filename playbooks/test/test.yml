@@ -3,4 +3,4 @@
 - name: testing git
   debug:
     msg: hello this is git
-    
+    verbosity: 0
