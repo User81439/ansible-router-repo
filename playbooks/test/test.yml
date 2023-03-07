@@ -1,6 +1,7 @@
----
-
-- name: testing git
-  debug:
-    msg: hello this is git
-    verbosity: 0
+- name: Git Sample
+  hosts: all
+  tasks:
+    - name: Message
+      debug:
+        msg: "hello this is git"
+        verbosity: 0
