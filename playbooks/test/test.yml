@@ -1,0 +1,6 @@
+---
+
+- name: testing git
+  debug:
+    msg: hello this is git
+    
