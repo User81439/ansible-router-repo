@@ -1,0 +1,78 @@
+[
+    {
+      "_ref": "record:host/bvpivbnpivnpnv:cbr-rmg-1.mtn.wan/default",
+      "ipv4addrs": [
+        {
+         "_ref": "record:host_ipv4addr/bvpivbnpivnpnv:127.0.0.1/cbr-rmg-1.mtn.wan/default",
+          "configure_for_dhcp": false,
+          "host": "cbr-rmg-1.mtn.wan",
+          "ipv4addr": "127.0.0.1"
+        }
+      ],
+      "name": "cbr-rmg-1.mtn.wan",
+      "view": "default"
+    },
+      {
+      "_ref": "record:host/bniurpbvarvarnb:cbr-rmg-2.mtn.wan/default",
+      "ipv4addrs": [
+        {
+         "_ref": "record:host_ipv4addr/bniurpbvarvarnb:127.0.1.1/cbr-rmg-2.mtn.wan/default",
+          "configure_for_dhcp": false,
+          "host": "cbr-rmg-2.mtn.wan",
+          "ipv4addr": "127.0.1.1"
+        }
+      ],
+      "name": "cbr-rmg-2.mtn.wan",
+      "view": "default"
+    },
+    {
+      "_ref": "record:host/bvpivbnpivnpnv:cbr-rmg-1.mtn.wan/default",
+      "ipv4addrs": [
+        {
+         "_ref": "record:host_ipv4addr/bvpivbnpivnpnv:127.2.0.1/cbr-rmg-1.mtn.wan/default",
+          "configure_for_dhcp": false,
+          "host": "cbr-cag-1.mtn.wan",
+          "ipv4addr": "127.2.0.1"
+        }
+      ],
+      "name": "cbr-cag-1.mtn.wan",
+      "view": "default"
+    },
+      {
+      "_ref": "record:host/bniurpbvarvarnb:cbr-rmg-2.mtn.wan/default",
+      "ipv4addrs": [
+        {
+         "_ref": "record:host_ipv4addr/bniurpbvarvarnb:127.2.1.1/cbr-rmg-2.mtn.wan/default",
+          "configure_for_dhcp": false,
+          "host": "cbr-cag-2.mtn.wan",
+          "ipv4addr": "127.2.1.1"
+        }
+      ],
+      "name": "cbr-cag-4.mtn.wan",
+      "view": "default"
+    },
+      {
+      "_ref": "record:host/nvpirbpenrgoeijf:cbr-rmg-3.mtn.wan/default",
+      "ipv4addrs": [
+        {
+         "_ref": "record:host_ipv4addr/nvpirbpenrgoeijf:127.1.2.1/cbr-rmg-3.mtn.wan/default",
+          "configure_for_dhcp": false,
+          "host": "cbr-cag-3.mtn.wan",
+          "ipv4addr": "127.1.2.1"
+        }
+      ],
+      "name": "cbr-cag-3.mtn.wan",
+      "view": "default"
+    },
+    {
+      "_ref": "record:host/hsthsthrtsrthsh:cbr-rmg-4.mtn.wan/default",
+      "ipv4addr": "127.0.0.4",
+      "name": "cbr-rmg-4.pd.wan",
+      "view": "default"
+    },
+      {
+      "_ref": "record:host/bvisbvkjndvkjsndf:cbr-rmg-5.mtn.wan/default",
+      "ptrdname": "cbr-rmg-5.pd.wan",
+      "view": "default"
+    }
+  ]
