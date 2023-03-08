@@ -1,5 +1,6 @@
 - name: Git Sample
-  hosts: xr_networks
+  connection: network_cli
+  hosts: xr_network
 
   tasks:
     - name: Message
