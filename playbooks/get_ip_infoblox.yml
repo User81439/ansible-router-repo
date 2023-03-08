@@ -51,10 +51,10 @@
         verbosity: 0
 
 #Write ips to file
-    - name: Erase existing routers file
-      file:
-        path: "{{ router_list_path }}{{ router_list_file }}"
-        state: absent
+    # - name: Erase existing routers file
+    #   file:
+    #     path: "{{ router_list_path }}{{ router_list_file }}"
+    #     state: absent
 
     - name: Write routers to file
       lineinfile:
@@ -66,10 +66,10 @@
       with_items: "{{ infoblox_json }}"
 
 #Put them into the .ini file
-    - name: Erase existing inventory file
-      file:
-        path: "inventory.ini"
-        state: absent
+    # - name: Erase existing inventory file
+    #   file:
+    #     path: "inventory.ini"
+    #     state: absent
 
     - name: Open file and assign to variable
       set_fact:
