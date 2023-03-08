@@ -16,16 +16,16 @@
 
   tasks:
 
-    - name: Get state you want to update
-      pause:
-        prompt: "Enter state: {{ options }}"
-      register: state
+    # - name: Get state you want to update
+    #   pause:
+    #     prompt: "Enter state: {{ options }}"
+    #   register: state
 
     - name: Fail if option is invalid
       fail:
-        msg: "Selected option {{ state.user_input }} invalid, exiting.."
+        msg: "Selected option {{ state }} invalid, exiting.."
         verbosity: 0
-      when: state.user_input not in options
+      when: state not in options
 
 #Query Infoblox
 #Placeholder file read
@@ -73,10 +73,10 @@
       lineinfile:
         path: "{{ inventory_file }}"
         line: |
-          [XR-network]
+          [xr_network]
           {{ router_list }}
 
-          [XR-network:vars]
+          [xr_network:vars]
           ansible_connection=ansible.netcommon.network_cli
           ansible_network_os=cisco.iosxr.iosxr
         state: present
