@@ -3,7 +3,7 @@
 #Setup
 - name: Post upgrade check XR
   connection: network_cli
-  hosts: XR-network
+  
 
 #Ask for user and password
   # vars_prompt:
