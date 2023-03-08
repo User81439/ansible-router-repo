@@ -87,4 +87,3 @@
           ansible_network_os=cisco.iosxr.iosxr
         state: present
         create: yes
-
