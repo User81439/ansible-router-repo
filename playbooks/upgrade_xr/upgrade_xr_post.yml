@@ -6,13 +6,13 @@
   hosts: XR-network
 
 #Ask for user and password
-  vars_prompt:
-    - name: "ansible_user"
-      prompt: "Enter router username"
-      private: no
-    - name: "ansible_password"
-      prompt: "Enter router password"
-      private: yes
+  # vars_prompt:
+  #   - name: "ansible_user"
+  #     prompt: "Enter router username"
+  #     private: no
+  #   - name: "ansible_password"
+  #     prompt: "Enter router password"
+  #     private: yes
 
 #Set Vars
   vars:
@@ -20,8 +20,8 @@
     precheck_path: "/data/Cisco/"
  #Set user and password
     ansible_connection: network_cli
-    ansible_user: "{{ ansible_user }}"
-    ansible_password: "{{ ansible_password }}"
+    # ansible_user: "{{ ansible_user }}"
+    # ansible_password: "{{ ansible_password }}"
 
 #Run Tasks
   tasks:
