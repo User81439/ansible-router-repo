@@ -2,6 +2,7 @@
 
 - name: Get router names
   hosts: localhost
+  gather_facts: no
 
   vars:
     router_list_path: "router_lists/"
