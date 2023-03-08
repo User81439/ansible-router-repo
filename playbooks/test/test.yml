@@ -1,7 +1,23 @@
 - name: Git Sample
   hosts: xr_networks
+
   tasks:
     - name: Message
       debug:
         msg: "hello this is git"
+        verbosity: 0
+
+  #Gather facts
+    - name: Gather facts from Cisco XR router
+      ios_facts:
+        gather_subset: min
+
+  #Set router type
+    - name: Set router model variable
+      set_fact:
+        router_type: "{{ ansible_net_model }}"
+    
+    - name: Message
+      debug:
+        msg: "{{ router_type }}"
         verbosity: 0
