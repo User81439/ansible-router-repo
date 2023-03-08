@@ -29,9 +29,8 @@
       when: state not in options
 
     - name: print if option valid
-      fail:
+      debug:
         msg: "Selected option {{ state }}"
-        verbosity: 0
       when: state in options
 
 #Query Infoblox
