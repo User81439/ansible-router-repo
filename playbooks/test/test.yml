@@ -1,5 +1,5 @@
 - name: Git Sample
-  hosts: all
+  hosts: xr_networks
   tasks:
     - name: Message
       debug:
