@@ -27,6 +27,12 @@
         verbosity: 0
       when: state not in options
 
+    - name: print if option valid
+      fail:
+        msg: "Selected option {{ state }}"
+        verbosity: 0
+      when: state in options
+
 #Query Infoblox
 #Placeholder file read
     - name: Read infoblox.json file
