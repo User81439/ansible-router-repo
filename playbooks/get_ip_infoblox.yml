@@ -11,7 +11,8 @@
 
 #    infoblox_credentials: "infoblox_username:infoblox_password"
 #    infoblox_search: "state.user_input"
-#    infoblox_base_curl: "curl -k1 -u {{ infoblox_credentials }} -X GET 'https://10.19.9.209/wapi/v2.9/search' -d 'fqdn~={{ infoblox_>
+#    infoblox_fqdn: "rmg" # etc, what to search for in router name
+#    infoblox_base_curl: "curl -k1 -u {{ infoblox_credentials }} -X GET 'https://10.19.9.209/wapi/v2.9/search' -d 'fqdn~={{ infoblox_fqdn }}'
 
     options: ['test', 'test2', 'etc.']
 

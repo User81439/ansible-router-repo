@@ -1,0 +1,36 @@
+---
+
+- hosts: localhost
+  vars:
+    nios_provider:
+      host: infoblox.itb.lab
+      # username: admin
+      # password: infoblox
+      wapi_version: '2.11'
+
+  connection: local
+  tasks:
+    - name: fetch all networkview objects
+      set_fact:
+        networkviews: "{{ lookup('nios', 'networkview', provider=nios_provider) }}"
+
+    - name: check the networkviews
+      debug:
+        var: networkviews
+
+    - name: fetch host
+      set_fact:
+         host: "{{ lookup('nios', 'search', filter={'fqdn~': 'cir-'}, provider=nios_provider) }}"
+
+#    - name: check the leaf01 return variable
+#      debug:
+#        var: host
+
+    - name: extract ipv4 addresses from host
+      set_fact:
+        ipv4_addresses: "{{ host | json_query('ipv4addrs[*].ipv4addr') }}"
+
+
+    - name: debug specific variable (ipv4 address)
+      debug:
+        msg: "{{ host.ipv4addrs.ipv4addr if host.ipv4addrs is defined else '' }}"
