@@ -1,6 +1,7 @@
 ---
 
 - hosts: localhost
+  gather_facts: no
   vars:
     nios_provider:
       host: infoblox.itb.lab
@@ -10,13 +11,13 @@
 
   connection: local
   tasks:
-    - name: fetch all networkview objects
-      set_fact:
-        networkviews: "{{ lookup('nios', 'networkview', provider=nios_provider) }}"
+    # - name: fetch all networkview objects
+    #   set_fact:
+    #     networkviews: "{{ lookup('nios', 'networkview', provider=nios_provider) }}"
 
-    - name: check the networkviews
-      debug:
-        var: networkviews
+    # - name: check the networkviews
+    #   debug:
+    #     var: networkviews
 
     - name: fetch host
       set_fact:
