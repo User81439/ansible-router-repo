@@ -23,9 +23,9 @@
       set_fact:
          host: "{{ lookup('nios', 'search', filter={'fqdn~': 'cir-'}, provider=nios_provider) }}"
 
-#    - name: check the leaf01 return variable
-#      debug:
-#        var: host
+   - name: output
+     debug:
+       msg: "{{ host }}"
 
     - name: extract ipv4 addresses from host
       set_fact:
@@ -35,3 +35,4 @@
     - name: debug specific variable (ipv4 address)
       debug:
         msg: "{{ host.ipv4addrs.ipv4addr if host.ipv4addrs is defined else '' }}"
+
