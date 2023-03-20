@@ -18,8 +18,13 @@
     # - name: check the networkviews
     #   debug:
     #     var: networkviews
-    - name: can you see infoblox?
-      command: ping infoblox.itb.lab -c 4
+    - name: Ping Host
+      ansible.builtin.ping:
+      register: ping_result
+
+    - name: Print Result
+      ansible.builtin.debug:
+        var: ping_result
 
     - name: run shell commands
       shell: |
