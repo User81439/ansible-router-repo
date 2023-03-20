@@ -1,12 +1,12 @@
 ---
 
 - hosts: localhost
-  gather_facts: no
+  gather_facts: yes
   vars:
     nios_provider:
       host: infoblox.itb.lab
-      # username: admin
-      # password: infoblox
+      username: admin
+      password: infoblox
       wapi_version: '2.11'
 
   connection: local
@@ -19,20 +19,22 @@
     #   debug:
     #     var: networkviews
 
-    - name: Install collection
+    - name: run shell commands
       shell: |
+        sudo pip install infoblox-client
         python --version
-        pip3 show infoblox-client
         ansible --version
+        pip3 show infoblox-client
+        ansible-galaxy collection install infoblox.nios_modules
+        ansible-galaxy collection list infoblox.nios_modules        
         cd /usr/share/ansible/collections/ansible_collections
         ls
 
-    - name: Install collection
-      command: ansible-galaxy collection list infoblox.nios_modules
-      register: install_output
+    # - name: Install collection
+    #   command: ansible-galaxy collection list infoblox.nios_modules
 
-    - name: List installed collections
-      command: ansible-galaxy collection list
+    # - name: List installed collections
+    #   command: ansible-galaxy collection list
 
     - name: use env variables to pass credentials
       ansible.builtin.set_fact:
