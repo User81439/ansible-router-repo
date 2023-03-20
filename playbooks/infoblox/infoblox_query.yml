@@ -49,9 +49,9 @@
     # - name: List installed collections
     #   command: ansible-galaxy collection list
 
-    - name: use env variables to pass credentials
-      ansible.builtin.set_fact:
-        networkviews: "{{ lookup('infoblox.nios_modules.nios_lookup', 'networkview') }}"
+    # - name: use env variables to pass credentials
+    #   ansible.builtin.set_fact:
+    #     networkviews: "{{ lookup('infoblox.nios_modules.nios_lookup', 'networkview') }}"
 
     - name: fetch host
       set_fact:
