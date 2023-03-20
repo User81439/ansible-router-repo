@@ -31,6 +31,10 @@
     - name: run show commands
       shell: |       
         cd /usr/share/ansible/collections/ansible_collections
+        ls    
+    - name: run show runner commands
+      shell: |       
+        cd /runner/requirements_collections/ansible_collections
         ls
     # - name: Install collection
     #   command: ansible-galaxy collection list infoblox.nios_modules
