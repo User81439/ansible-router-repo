@@ -1,7 +1,7 @@
 ---
 
 - hosts: localhost
-  gather_facts: yes
+  gather_facts: no
   vars:
     nios_provider:
       host: infoblox.itb.lab
@@ -21,11 +21,11 @@
 
     - name: run shell commands
       shell: |
-        sudo pip3 install infoblox-client
+        pip3 install infoblox-client
         python --version
         ansible --version
         pip3 show infoblox-client
-        ansible-galaxy collection install infoblox.nios_modules
+        ansible-galaxy collection install infoblox.nios_modules -p /usr/share/ansible/collections/ansible_collections
         ansible-galaxy collection list infoblox.nios_modules
 
     - name: run show commands
