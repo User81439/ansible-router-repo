@@ -20,9 +20,12 @@
     #     var: networkviews
 
     - name: Install collection
-      community.general.collection:
-        name: infoblox.nios_modules
-        state: present
+      command: ansible-galaxy collection list infoblox
+      register: install_output
+
+    - name: Print installed msg
+      debug:
+        var: install_output.stdout_lines
 
     - name: List installed collections
       command: ansible-galaxy collection list
