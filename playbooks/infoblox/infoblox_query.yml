@@ -21,15 +21,17 @@
 
     - name: run shell commands
       shell: |
-        sudo pip install infoblox-client
+        sudo pip3 install infoblox-client
         python --version
         ansible --version
         pip3 show infoblox-client
         ansible-galaxy collection install infoblox.nios_modules
-        ansible-galaxy collection list infoblox.nios_modules        
+        ansible-galaxy collection list infoblox.nios_modules
+
+    - name: run show commands
+      shell: |       
         cd /usr/share/ansible/collections/ansible_collections
         ls
-
     # - name: Install collection
     #   command: ansible-galaxy collection list infoblox.nios_modules
 
