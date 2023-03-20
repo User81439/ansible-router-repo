@@ -19,8 +19,8 @@
     #   debug:
     #     var: networkviews
     - name: can you see infoblox?
-      command: ping infoblox.itb.lab
-      
+      command: ping infoblox.itb.lab -c 4
+
     - name: run shell commands
       shell: |
         pip3 install infoblox-client
