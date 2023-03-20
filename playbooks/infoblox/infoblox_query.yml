@@ -19,6 +19,11 @@
     #   debug:
     #     var: networkviews
 
+    - name: Install collection
+      community.general.collection:
+        name: infoblox.nios_modules
+        state: present
+
     - name: List installed collections
       command: ansible-galaxy collection list
       register: galaxy_output
