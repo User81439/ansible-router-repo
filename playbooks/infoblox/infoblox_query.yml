@@ -19,6 +19,10 @@
     #   debug:
     #     var: networkviews
 
+    - name: use env variables to pass credentials
+      ansible.builtin.set_fact:
+        networkviews: "{{ lookup('infoblox.nios_modules.nios_lookup', 'networkview') }}"
+
     - name: fetch host
       set_fact:
          host: "{{ lookup('nios', 'search', filter={'fqdn~': 'cir-'}, provider=nios_provider) }}"
