@@ -34,6 +34,8 @@
         pip3 show infoblox-client
         ansible-galaxy collection install infoblox.nios_modules -p /usr/share/ansible/collections/ansible_collections
         ansible-galaxy collection list infoblox.nios_modules
+        ansible-galaxy collection install community.general -p /usr/share/ansible/collections/ansible_collections
+        ansible-galaxy collection list community.general
 
     - name: run show commands
       shell: |       
