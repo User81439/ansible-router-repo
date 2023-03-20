@@ -26,10 +26,6 @@
       command: ansible-galaxy collection list infoblox.nios_modules
       register: install_output
 
-    - name: Print installed msg
-      debug:
-        var: install_output.stdout_lines
-
     - name: List installed collections
       command: ansible-galaxy collection list
       register: galaxy_output
