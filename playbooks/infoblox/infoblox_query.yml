@@ -3,10 +3,10 @@
 - hosts: localhost
   gather_facts: no
   vars:
-    nios_provider:
+    infoblox_nios_wapi:
       host: infoblox.itb.lab
-      username: admin
-      password: infoblox
+      # username: admin
+      # password: infoblox
       wapi_version: '2.11'
 
   connection: local
