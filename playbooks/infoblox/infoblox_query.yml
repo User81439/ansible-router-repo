@@ -20,7 +20,9 @@
     #     var: networkviews
 
     - name: Install collection
-      command: pip3 install infoblox-client
+      commands: |
+        cd /usr/share/ansible/collections/ansible_collections
+        ls
 
     - name: Install collection
       command: ansible-galaxy collection list infoblox.nios_modules
