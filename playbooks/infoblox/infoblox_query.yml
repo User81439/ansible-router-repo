@@ -15,34 +15,23 @@
     #   set_fact:
     #     networkviews: "{{ lookup('nios', 'networkview', provider=nios_provider) }}"
 
-    # - name: check the networkviews
-    #   debug:
-    #     var: networkviews
-    # - name: Ping Host
-    #   ansible.builtin.ping:
-    #   register: ping_result
+    # - name: run shell commands
+    #   shell: |
+    #     pip3 install infoblox-client
+    #     python --version
+    #     ansible --version
+    #     pip3 show infoblox-client
+    #     ansible-galaxy collection install infoblox.nios_modules -p /usr/share/ansible/collections/ansible_collections
+    #     ansible-galaxy collection list infoblox.nios_modules
+    #     ansible-galaxy collection install community.general -p /usr/share/ansible/collections/ansible_collections
+    #     ansible-galaxy collection list community.general
 
-    # - name: Print Result
-    #   ansible.builtin.debug:
-    #     var: ping_result
-
-    - name: run shell commands
-      shell: |
-        pip3 install infoblox-client
-        python --version
-        ansible --version
-        pip3 show infoblox-client
-        ansible-galaxy collection install infoblox.nios_modules -p /usr/share/ansible/collections/ansible_collections
-        ansible-galaxy collection list infoblox.nios_modules
-        ansible-galaxy collection install community.general -p /usr/share/ansible/collections/ansible_collections
-        ansible-galaxy collection list community.general
-
-    - name: run show commands
-      shell: |       
-        cd /usr/share/ansible/collections/ansible_collections
-        ls
-        cd /usr/share/ansible/collections/ansible_collections/infoblox/nios_modules
-        ls
+    # - name: run show commands
+    #   shell: |       
+    #     cd /usr/share/ansible/collections/ansible_collections
+    #     ls
+    #     cd /usr/share/ansible/collections/ansible_collections/infoblox/nios_modules
+    #     ls
     # - name: run show runner commands
     #   shell: |       
     #     cd /runner/requirements_collections/ansible_collections
