@@ -21,6 +21,7 @@
 
     - name: Install collection
       shell: |
+        python --version
         cd /usr/share/ansible/collections/ansible_collections
         ls
 
@@ -30,11 +31,6 @@
 
     - name: List installed collections
       command: ansible-galaxy collection list
-      register: galaxy_output
-
-    - name: Print installed collections
-      debug:
-        var: galaxy_output.stdout_lines
 
     - name: use env variables to pass credentials
       ansible.builtin.set_fact:
