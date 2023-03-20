@@ -22,6 +22,8 @@
     - name: Install collection
       shell: |
         python --version
+        pip3 show infoblox-client
+        ansible --version
         cd /usr/share/ansible/collections/ansible_collections
         ls
 
