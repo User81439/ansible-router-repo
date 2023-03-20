@@ -1,6 +1,6 @@
 ---
 
-- hosts: infoblox.itb.lab
+- hosts: localhost
   gather_facts: no
   vars:
     nios_provider:
