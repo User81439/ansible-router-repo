@@ -20,7 +20,7 @@
     #     var: networkviews
 
     - name: Install collection
-      commands: |
+      command: |
         cd /usr/share/ansible/collections/ansible_collections
         ls
 
