@@ -18,13 +18,13 @@
     # - name: check the networkviews
     #   debug:
     #     var: networkviews
-    - name: Ping Host
-      ansible.builtin.ping:
-      register: ping_result
+    # - name: Ping Host
+    #   ansible.builtin.ping:
+    #   register: ping_result
 
-    - name: Print Result
-      ansible.builtin.debug:
-        var: ping_result
+    # - name: Print Result
+    #   ansible.builtin.debug:
+    #     var: ping_result
 
     - name: run shell commands
       shell: |
@@ -49,13 +49,9 @@
     # - name: List installed collections
     #   command: ansible-galaxy collection list
 
-    # - name: use env variables to pass credentials
-    #   ansible.builtin.set_fact:
-    #     networkviews: "{{ lookup('infoblox.nios_modules.nios_lookup', 'networkview') }}"
-
     - name: fetch host
       set_fact:
-         host: "{{ lookup('nios', 'search', filter={'fqdn~': 'cir-'}, provider=nios_provider) }}"
+         host: "{{ lookup('ansible.builtin.nios', 'search', filter={'fqdn~': 'cir-'}, provider=nios_provider) }}"
 
     - name: output
       debug:
