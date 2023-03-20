@@ -56,7 +56,7 @@
     - name: fetch host
       set_fact:
         # host: "{{ lookup('community.general.nios', 'search', filter={'fqdn~': 'cir-'}, provider=nios_provider) }}"
-        host: "{{ lookup('infoblox.nios_modules.nios.nios_lookup', 'search', filter={'fqdn~': 'cir-'}, provider=nios_provider) }}"
+        host: "{{ lookup('infoblox.nios_modules.nios_lookup', 'search', filter={'fqdn~': 'cir-'}, provider=nios_provider) }}"
 
     - name: output
       debug:
