@@ -40,7 +40,9 @@
     - name: run show commands
       shell: |       
         cd /usr/share/ansible/collections/ansible_collections
-        ls    
+        ls
+        cd /usr/share/ansible/collections/ansible_collections/infoblox/nios_modules
+        ls
     # - name: run show runner commands
     #   shell: |       
     #     cd /runner/requirements_collections/ansible_collections
