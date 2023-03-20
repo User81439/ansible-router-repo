@@ -1,12 +1,12 @@
 ---
 
-- hosts: localhost
+- hosts: infoblox.itb.lab
   gather_facts: no
   vars:
     nios_provider:
       host: infoblox.itb.lab
-      # username: admin
-      # password: infoblox
+      username: admin
+      password: infoblox
       wapi_version: '2.11'
 
   connection: local
@@ -55,7 +55,6 @@
 
     - name: fetch host
       set_fact:
-        # host: "{{ lookup('community.general.nios', 'search', filter={'fqdn~': 'cir-'}, provider=nios_provider) }}"
         host: "{{ lookup('infoblox.nios_modules.nios_lookup', 'search', filter={'fqdn~': 'cir-'}, provider=nios_provider) }}"
 
     - name: output
