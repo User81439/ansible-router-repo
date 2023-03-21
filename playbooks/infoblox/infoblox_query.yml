@@ -2,7 +2,7 @@
 
 - hosts: localhost
   gather_facts: no
-  vars:
+  vars: 
     nios_provider:
       host: infoblox.itb.lab
       username: "{{ ansible_user }}"
@@ -20,7 +20,7 @@
 
     - name: search wapi for all domain names containing 'cir'
       set_fact:
-        host: "{{ lookup('infoblox.nios_modules.nios_lookup', 'search', filter={'fqdn~': 'cir-'}, provider=nios_provider) }}"
+        host: "{{ lookup('infoblox.nios_modules.nios_lookup', 'search', filter={'fqdn~': host_type}, provider=nios_provider) }}"
 
     - name: output
       debug:
