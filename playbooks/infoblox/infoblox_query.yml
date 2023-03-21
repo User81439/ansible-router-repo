@@ -10,14 +10,15 @@
       wapi_version: '2.11'
 
   connection: local
+
   tasks:
-    - name: run shell commands
+    - name: install requirements; infoblox-client, infoblox.nios_modules, community.general
       shell: |
         pip3 install infoblox-client
         ansible-galaxy collection install infoblox.nios_modules -p /usr/share/ansible/collections/ansible_collections
         ansible-galaxy collection install community.general -p /usr/share/ansible/collections/ansible_collections
 
-    - name: fetch host
+    - name: search wapi for all domain names containing 'cir'
       set_fact:
         host: "{{ lookup('infoblox.nios_modules.nios_lookup', 'search', filter={'fqdn~': 'cir-'}, provider=nios_provider) }}"
 
@@ -27,8 +28,7 @@
 
     - name: extract ipv4 addresses from host
       set_fact:
-        ipv4_addresses: "{{ host | json_query('ipv4addrs[*].ipv4addr') }}"
-
+        ipv4_addresses: "{{ host | json_query('[].ipv4addrs[].ipv4addr') }}"
 
     - name: debug specific variable (ipv4 address)
       debug:
