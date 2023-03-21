@@ -28,9 +28,5 @@
 
     - name: extract ipv4 addresses from host
       set_fact:
-        ipv4_addresses: "{{ host | json_query('[].ipv4addrs[].ipv4addr') }}"
-
-    - name: debug specific variable (ipv4 address)
-      debug:
-        msg: "{{ host.ipv4addrs.ipv4addr if host.ipv4addrs is defined else '' }}"
+        ipv4_addresses: "{{ host | json_query('[].ipv4addrs[].ipv4addr') if host.ipv4addrs is defined else '' }}"
 
