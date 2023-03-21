@@ -5,8 +5,8 @@
   vars:
     nios_provider:
       host: infoblox.itb.lab
-      # username: admin
-      # password: infoblox
+      username: "{{ ansible_user }}"
+      password: "{{ ansible_password }}"
       wapi_version: '2.11'
 
   connection: local
