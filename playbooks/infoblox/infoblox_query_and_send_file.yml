@@ -12,7 +12,7 @@
       password: "{{ ansible_password }}"
       wapi_version: '2.11'
 
-  connection: network_cli
+  connection: local
 
   tasks:
     # this process needs internet access to download the requirements, solution: create own repo server running on machine which hosts files in expected location?
@@ -49,6 +49,7 @@
     #   loop: "{{ ipv4_addresses }}"
 
     - name: Copy file to Cisco router
+      connection: network_cli
       cisco.ios.ios_command:
         commands:
           - "copy scp://ssh_test:ssh_test@{{ item }}/{{ file }} harddisk:/{{ file }}"
