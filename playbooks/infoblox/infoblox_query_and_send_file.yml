@@ -48,7 +48,7 @@
     - name: testing copy
       copy:
         src: /etc/ansible/{{ file }}
-        dst: ssh_test@{{ item }}:harddisk:/{{ file }}
+        dest: ssh_test@{{ item }}:harddisk:/{{ file }}
       delegate_to: localhost
       register: transfer
       failed_when: transfer.rc != 0 or "No such" in transfer.stdout
