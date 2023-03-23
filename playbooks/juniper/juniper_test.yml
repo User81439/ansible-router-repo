@@ -7,8 +7,8 @@
   tasks:
     - name: install requirements;
       shell: |
-        ansible-galaxy collection install junipernetworks.junos -p /usr/share/ansible/collections/ansible_collections
-        
+        ansible-galaxy collection install junipernetworks.junos -p /usr/share/ansible/roles
+
   roles:
     - Juniper.junos
 
