@@ -2,7 +2,8 @@
 
 - hosts: localhost
   gather_facts: no
-  vars: 
+  vars:
+    file: test.img
     nios_provider:
       host: infoblox.itb.lab
       username: "{{ ansible_user }}"
@@ -12,21 +13,28 @@
   connection: local
 
   tasks:
+    # this process needs internet access to download the requirements, solution: create own repo server running on machine which hosts files in expected location?
     - name: install requirements; infoblox-client, infoblox.nios_modules, community.general
       shell: |
         pip3 install infoblox-client
         ansible-galaxy collection install infoblox.nios_modules -p /usr/share/ansible/collections/ansible_collections
         ansible-galaxy collection install community.general -p /usr/share/ansible/collections/ansible_collections
 
-    - name: search wapi for all domain names containing 'cir'
+    - name: search wapi for all domain names containing the variable passed in as 'host_type' when job is started
       set_fact:
         host: "{{ lookup('infoblox.nios_modules.nios_lookup', 'search', filter={'fqdn~': host_type}, provider=nios_provider) }}"
 
-    - name: output
-      debug:
-        msg: "{{ host }}"
-
-    - name: extract ipv4 addresses from host
+    - name: extract ipv4 addresses from host and put into variable 'ipv4_addresses'
       set_fact:
         ipv4_addresses: "{{ host | community.general.json_query('[].ipv4addrs[].ipv4addr') }}"
 
+    - name: Copy file to each ipv4_addresses
+      expect:
+        command: scp /data/Cisco/{{ file }} ssh_test@{{ item }}:harddisk:/{{ file }}
+        timeout: 300
+        responses:
+          (.*)Password: ssh_test #"{{ ansible_password }}" not sure how to give 2 seperate machine credentials...
+      delegate_to: localhost
+      register: transfer
+      failed_when: transfer.rc != 0 or "No such" in transfer.stdout
+      loop: "{{ ipv4_addresses }}"
