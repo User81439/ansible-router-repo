@@ -8,13 +8,13 @@
     - Juniper.junos
 
   #Ask for user and password
-  vars_prompt:
-    - name: "ansible_user"
-      prompt: "Enter router username"
-      private: no
-    - name: "ansible_password"
-      prompt: "Enter router password"
-      private: yes
+  # vars_prompt:
+  #   - name: "ansible_user"
+  #     prompt: "Enter router username"
+  #     private: no
+  #   - name: "ansible_password"
+  #     prompt: "Enter router password"
+  #     private: yes
 
   #Set Vars
   vars:
