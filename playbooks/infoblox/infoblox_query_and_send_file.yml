@@ -71,6 +71,10 @@
       ignore_errors: true
       register: host_status
 
+    - name: debug host_status.results
+      debug:
+        var: host_status.results
+
     - name: send file to reachable hosts
       copy:
         src: /etc/ansible/{{ file }}
