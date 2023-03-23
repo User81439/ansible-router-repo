@@ -12,7 +12,7 @@
       password: "{{ ansible_password }}"
       wapi_version: '2.11'
 
-  connection: local
+  connection: network_cli
 
   tasks:
     # this process needs internet access to download the requirements, solution: create own repo server running on machine which hosts files in expected location?
