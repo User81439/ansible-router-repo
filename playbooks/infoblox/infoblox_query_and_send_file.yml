@@ -49,7 +49,7 @@
     #   loop: "{{ ipv4_addresses }}"
 
     - name: Copy file to Cisco router
-      ansible.netcommon.network_cli.ios_command:
+      cisco.ios.ios_command:
         commands:
           - "copy scp://ssh_test:ssh_test@{{ item }}/{{ file }} harddisk:/{{ file }}"
         host: "{{ item }}"
