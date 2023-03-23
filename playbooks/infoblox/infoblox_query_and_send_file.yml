@@ -74,7 +74,7 @@
     - name: send file to reachable hosts
       copy:
         src: /etc/ansible/{{ file }}
-        dest: /{{ item }}:harddisk:/{{ file }}
+        dest: /{{ item }}:bootflash:/{{ file }}
       delegate_to: localhost
       register: transfer
       when: item.state == 'success'
