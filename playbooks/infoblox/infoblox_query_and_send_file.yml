@@ -77,4 +77,4 @@
         dest: /{{ item }}:harddisk:/{{ file }}
       delegate_to: localhost
       register: transfer
-      loop: "{{ host_status.results }}"
+      loop: "{{ host_status.results | selectattr('eq', 'success') | map(attribute='item') | list }}"
