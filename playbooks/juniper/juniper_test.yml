@@ -1,10 +1,8 @@
 ---
 
-- name: install requirements;
+- name: Get Device Facts
   shell: |
     ansible-galaxy collection install junipernetworks.junos -p /usr/share/ansible/collections/ansible_collections
-    
-- name: Get Device Facts
   hosts: mx
   connection: local
   gather_facts: no
