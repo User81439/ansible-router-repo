@@ -17,14 +17,15 @@
     - name: install requirements; infoblox-client, infoblox.nios_modules, community.general
       shell: |
         pip3 install infoblox-client
-        pip3 install pexpect
+        # pip3 install pexpect
         ansible-galaxy collection install infoblox.nios_modules -p /usr/share/ansible/collections/ansible_collections
         ansible-galaxy collection install community.general -p /usr/share/ansible/collections/ansible_collections
+        ansible-galaxy collection install ansible.netcommon -p /usr/share/ansible/collections/ansible_collections
 
-    - name: show / view info on packages
-      shell: |
-        python3 -m pip list
-        pip3 show pexpect
+    # - name: show / view info on packages
+    #   shell: |
+    #     python3 -m pip list
+    #     pip3 show pexpect
 
     - name: search wapi for all domain names containing the variable passed in as 'host_type' when job is started
       set_fact:
