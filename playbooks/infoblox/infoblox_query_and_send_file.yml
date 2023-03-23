@@ -17,6 +17,7 @@
     - name: install requirements; infoblox-client, infoblox.nios_modules, community.general
       shell: |
         pip3 install infoblox-client
+        pip3 install pexpect
         ansible-galaxy collection install infoblox.nios_modules -p /usr/share/ansible/collections/ansible_collections
         ansible-galaxy collection install community.general -p /usr/share/ansible/collections/ansible_collections
 
