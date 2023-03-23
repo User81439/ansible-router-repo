@@ -8,6 +8,8 @@
     - name: install requirements;
       shell: |
         ansible-galaxy collection install junipernetworks.junos -p /usr/share/ansible/roles
+        cd /usr/share/ansible/roles
+        ls
 
   roles:
     - Juniper.junos
