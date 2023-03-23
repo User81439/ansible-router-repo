@@ -3,7 +3,7 @@
 - hosts: localhost
   gather_facts: no
   vars:
-    file: test.img
+    file: md5-hash.txt
     nios_provider:
       host: infoblox.itb.lab
       username: "{{ ansible_user }}"
@@ -18,9 +18,14 @@
       shell: |
         pip3 install infoblox-client
         pip3 install pexpect
-        pip3 show pexpect
         ansible-galaxy collection install infoblox.nios_modules -p /usr/share/ansible/collections/ansible_collections
         ansible-galaxy collection install community.general -p /usr/share/ansible/collections/ansible_collections
+
+    - name: show / view info on packages
+      shell: |
+        python3 -m pip list
+        pip3 show pexpect
+
 
     - name: search wapi for all domain names containing the variable passed in as 'host_type' when job is started
       set_fact:
