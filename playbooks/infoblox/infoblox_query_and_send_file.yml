@@ -50,6 +50,7 @@
 
     - name: Copy file to Cisco router
       connection: network_cli
+      ansible_network_os: cisco.ios.ios
       cisco.ios.ios_command:
         commands:
           - "copy scp://ssh_test:ssh_test@{{ item }}/etc/ansible/{{ file }} bootflash:/{{ file }}"
