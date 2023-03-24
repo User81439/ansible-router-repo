@@ -37,27 +37,27 @@
       set_fact:
         ipv4_addresses: "{{ host | community.general.json_query('[].ipv4addrs[].ipv4addr') }}"
 
-    - name: Copy file to each ipv4_addresses
-      expect:
-        command: scp /data/Cisco/{{ file }} ssh_test@{{ item }}:harddisk:/{{ file }}
-        timeout: 300
-        responses:
-          (.*)Password: ssh_test #"{{ ansible_password }}" not sure how to give 2 seperate machine credentials...
-      delegate_to: "{{ item }}"
-      register: transfer
-      failed_when: transfer.rc != 0 or "No such" in transfer.stdout
-      loop: "{{ ipv4_addresses }}"
-
-    # - name: Copy file to Cisco router
-    #   connection: network_cli
-    #   cisco.ios.ios_command:
-    #     commands:
-    #       - "copy scp://ssh_test:ssh_test@{{ item }}/{{ file }} harddisk:/{{ file }}"
-    #     host: "{{ item }}"
-    #     connection_options:
-    #       netmiko:
-    #         platform: cisco_ios
-    #     auth_pass: ssh_test
+    # - name: Copy file to each ipv4_addresses
+    #   expect:
+    #     command: scp /data/Cisco/{{ file }} ssh_test@{{ item }}:harddisk:/{{ file }}
+    #     timeout: 300
+    #     responses:
+    #       (.*)Password: ssh_test #"{{ ansible_password }}" not sure how to give 2 seperate machine credentials...
+    #   delegate_to: "{{ item }}"
+    #   register: transfer
+    #   failed_when: transfer.rc != 0 or "No such" in transfer.stdout
     #   loop: "{{ ipv4_addresses }}"
-    #   delegate_to: "{{ inventory_hostname }}"
+
+    - name: Copy file to Cisco router
+      connection: network_cli
+      cisco.ios.ios_command:
+        commands:
+          - "copy scp://ssh_test:ssh_test@{{ item }}/etc/ansible/{{ file }} bootflash:/{{ file }}"
+        host: "{{ item }}"
+        connection_options:
+          netmiko:
+            platform: cisco_ios
+        auth_pass: ssh_test
+      loop: "{{ ipv4_addresses }}"
+      delegate_to: "{{ inventory_hostname }}"
 
