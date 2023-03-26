@@ -49,13 +49,14 @@
     #   loop: "{{ ipv4_addresses }}"
 
     - name: Copy file to Cisco router
-      connection: network_cli
+      # connection: network_cli
+      ansible_connection: "ansible.netcommon.network_cli"
       host: "{{ item }}"
       # ansible_network_os: cisco.ios.ios
       cisco.ios.ios:
         commands:
           - "copy scp://ssh_test:ssh_test@{{ item }}/etc/ansible/{{ file }} bootflash:/{{ file }}"
-        host: "{{ item }}"
+        # host: "{{ item }}"
         connection_options:
           netmiko:
             platform: cisco_ios
