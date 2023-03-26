@@ -50,6 +50,7 @@
 
     - name: Copy file to Cisco router
       connection: network_cli
+      host: "{{ item }}"
       # ansible_network_os: cisco.ios.ios
       cisco.ios.ios:
         commands:
