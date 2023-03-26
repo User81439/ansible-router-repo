@@ -48,27 +48,14 @@
     #   failed_when: transfer.rc != 0 or "No such" in transfer.stdout
     #   loop: "{{ ipv4_addresses }}"
 
-    # - name: Copy file to Cisco router
-    #   cisco.ios.ios:
-    #     # host: "{{ item }}"
-    #     commands:
-    #       - "copy scp://ssh_test:ssh_test@{{ item }}/etc/ansible/{{ file }} bootflash:/{{ file }}"
-    #     connection_options:
-    #       netmiko:
-    #         platform: cisco_ios
-    #     auth_pass: ssh_test
-    #   loop: "{{ ipv4_addresses }}"
-    #   delegate_to: "{{ item }}"
-
     - name: Copy file to Cisco router
-      ansible_network_os: cisco.ios.ios
       cisco.ios.ios:
-        host: "{{ item }}"
         commands:
           - "copy scp://ssh_test:ssh_test@{{ item }}/etc/ansible/{{ file }} bootflash:/{{ file }}"
-        connection_options:
-          netmiko:
-            platform: cisco_ios
+        # connection_options:
+        #   netmiko:
+        #     platform: cisco_ios
         auth_pass: ssh_test
       loop: "{{ ipv4_addresses }}"
-      delegate_to: "{{ inventory_hostname }}"
+      delegate_to: "{{ item }}"
+
