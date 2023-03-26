@@ -49,8 +49,8 @@
     #   loop: "{{ ipv4_addresses }}"
 
     - name: Copy file to Cisco router
-      # connection: network_cli
-      ansible_connection: "ansible.netcommon.network_cli"
+      connection: network_cli
+      # ansible_connection: "ansible.netcommon.network_cli"
       cisco.ios.ios:
         host: "{{ item }}"
         commands:
