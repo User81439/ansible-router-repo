@@ -58,5 +58,5 @@
             platform: cisco_ios
         auth_pass: ssh_test
       loop: "{{ ipv4_addresses }}"
-      delegate_to: "{{ item }}"
+      delegate_to: host
 
