@@ -50,7 +50,7 @@
 
     - name: Copy file to Cisco router
       cisco.ios.ios:
-        host: "{{ item }}"
+        # host: "{{ item }}"
         commands:
           - "copy scp://ssh_test:ssh_test@{{ item }}/etc/ansible/{{ file }} bootflash:/{{ file }}"
         connection_options:
@@ -58,5 +58,5 @@
             platform: cisco_ios
         auth_pass: ssh_test
       loop: "{{ ipv4_addresses }}"
-      delegate_to: "{{ host }}"
+      delegate_to: "{{ item }}"
 
