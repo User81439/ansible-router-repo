@@ -52,9 +52,9 @@
       # connection: network_cli
       ansible_connection: "ansible.netcommon.network_cli"
       cisco.ios.ios:
+        host: "{{ item }}"
         commands:
           - "copy scp://ssh_test:ssh_test@{{ item }}/etc/ansible/{{ file }} bootflash:/{{ file }}"
-      host: "{{ item }}"
         connection_options:
           netmiko:
             platform: cisco_ios
