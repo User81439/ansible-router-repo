@@ -16,13 +16,13 @@
 
   tasks:
     # this process needs internet access to download the requirements, solution: create own repo server running on machine which hosts files in expected location?
-    # - name: install requirements; infoblox-client, infoblox.nios_modules, community.general
-    #   shell: |
-    #     pip3 install infoblox-client
-    #     # pip3 install pexpect
-    #     ansible-galaxy collection install infoblox.nios_modules -p /usr/share/ansible/collections/ansible_collections
-    #     ansible-galaxy collection install community.general -p /usr/share/ansible/collections/ansible_collections
-    #     ansible-galaxy collection install ansible.netcommon -p /usr/share/ansible/collections/ansible_collections
+    - name: install requirements; infoblox-client, infoblox.nios_modules, community.general
+      shell: |
+        pip3 install infoblox-client
+        # pip3 install pexpect
+        ansible-galaxy collection install infoblox.nios_modules -p /usr/share/ansible/collections/ansible_collections
+        ansible-galaxy collection install community.general -p /usr/share/ansible/collections/ansible_collections
+        ansible-galaxy collection install ansible.netcommon -p /usr/share/ansible/collections/ansible_collections
 
     # - name: show / view info on packages
     #   shell: |
