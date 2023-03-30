@@ -4,24 +4,15 @@
   hosts: mx
   connection: local
   gather_facts: no
-  tasks:
-    - name: install requirements;
-      shell: |
-        ansible-galaxy collection install junipernetworks.junos -p /usr/share/ansible/collections
-        cd /usr/share/ansible/collections
-        ls
+  
+- name: install requirements;
+  shell: |
+    ansible-galaxy collection install junipernetworks.junos -p /usr/share/ansible/collections
+    cd /usr/share/ansible/collections
+    ls
 
   roles:
     - Juniper.junos
-
-  #Ask for user and password
-  # vars_prompt:
-  #   - name: "ansible_user"
-  #     prompt: "Enter router username"
-  #     private: no
-  #   - name: "ansible_password"
-  #     prompt: "Enter router password"
-  #     private: yes
 
   #Set Vars
   vars:
